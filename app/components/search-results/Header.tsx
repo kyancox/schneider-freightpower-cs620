@@ -1,12 +1,15 @@
 'use client';
 
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+  const router = useRouter();
+
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
       <button 
-        onClick={() => {}}
+        onClick={() => router.push('/')}
         className="p-2 -ml-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
       >
         <ArrowLeft className="w-6 h-6 text-gray-900" />
