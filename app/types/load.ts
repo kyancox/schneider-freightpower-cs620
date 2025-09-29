@@ -1,6 +1,6 @@
 export interface Load {
   id: string;
-  badge?: any;
+  badge?: string;
   price: number;
   distance: number;
   weight: number;
