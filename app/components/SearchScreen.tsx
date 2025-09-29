@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import BottomNav from './search-results/BottomNav';
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -174,52 +175,7 @@ export default function SearchScreen() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t">
-        <div className="flex justify-around py-2">
-          <button className="flex flex-col items-center py-2 px-4">
-            <div className="w-6 h-6 mb-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              </svg>
-            </div>
-            <span className="text-xs">Home</span>
-          </button>
-          <button className="flex flex-col items-center py-2 px-4 text-[#ff6b35]">
-            <Search className="w-6 h-6 mb-1" />
-            <span className="text-xs">Search</span>
-          </button>
-          <button className="flex flex-col items-center py-2 px-4">
-            <div className="w-6 h-6 mb-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg>
-            </div>
-            <span className="text-xs">My Loads</span>
-          </button>
-          <button className="flex flex-col items-center py-2 px-4">
-            <div className="w-6 h-6 mb-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M12 1v6m0 6v6m-5-7H1m6 0h6m6 0h6" />
-              </svg>
-            </div>
-            <span className="text-xs">Manage</span>
-          </button>
-          <button className="flex flex-col items-center py-2 px-4">
-            <div className="w-6 h-6 mb-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="1" />
-                <circle cx="12" cy="5" r="1" />
-                <circle cx="12" cy="19" r="1" />
-              </svg>
-            </div>
-            <span className="text-xs">More</span>
-          </button>
-        </div>
-      </div>
+      <BottomNav />
 
       <style jsx>{`
         input[type="range"]::-webkit-slider-thumb {
