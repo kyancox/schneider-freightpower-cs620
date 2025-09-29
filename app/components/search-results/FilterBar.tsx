@@ -5,7 +5,7 @@ export default function FilterBar() {
   const [isStandardOnly, setIsStandardOnly] = useState(false);
   return (
     <div className="px-4 py-3 space-y-2">
-      <div className="flex items-center justify-between text-sm text-gray-700">
+      <div className="flex items-center justify-between text-xs text-gray-700">
         <span className="bg-[#f3efee]">Origin: <span className="font-medium bg-[#f3efee]">Green Bay, WI</span></span>
         <span className="bg-[#f3efee]">Origin Radius: <span className="font-medium bg-[#f3efee]">250 mi</span></span>
         <span className="bg-[#f3efee]">Pick-up Date: <span className="font-medium bg-[#f3efee]">Aug...</span></span>
