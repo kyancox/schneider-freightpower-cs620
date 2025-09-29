@@ -16,6 +16,7 @@ export const mockLoads: Load[] = [
       time: '7:00 AM',
       liveLoad: true,
       emptyMiles: 240,
+      address: '1234 Industrial Pkwy',
     },
     delivery: {
       city: 'MARION',
@@ -24,6 +25,7 @@ export const mockLoads: Load[] = [
       time: '12:01 AM',
       instructions: ['Drop Loaded Trailer', 'Pick Up Empty Trailer'],
       emptyMiles: 180,
+      address: '5678 Distribution Dr',
     },
     isReload: true,
   },
@@ -40,6 +42,7 @@ export const mockLoads: Load[] = [
       date: 'Thu, Aug 07',
       time: '1:34 PM',
       emptyMiles: 248,
+      address: '789 Steel Mill Rd',
     },
     delivery: {
       city: 'HANOVER PARK',
@@ -48,6 +51,7 @@ export const mockLoads: Load[] = [
       time: '3:18 PM',
       instructions: ['Pick Up Relay', 'Drop Empty Trailer'],
       emptyMiles: 125,
+      address: '321 Commerce Blvd',
     },
   },
 ];

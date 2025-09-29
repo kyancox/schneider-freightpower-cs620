@@ -1,4 +1,6 @@
+'use client';
 import { Eye, MapPin, RefreshCw } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Load } from '../../types/load';
 
 interface LoadCardProps {
@@ -6,6 +8,12 @@ interface LoadCardProps {
 }
 
 export default function LoadCard({ load }: LoadCardProps) {
+  const router = useRouter();
+
+  const handleBookNow = () => {
+    router.push(`/book/${load.id}`);
+  };
+
   return (
     <div className="bg-white border-b-8 border-gray-200 p-4 m-4">
       <div className="flex gap-4">
@@ -94,6 +102,14 @@ export default function LoadCard({ load }: LoadCardProps) {
           )}
         </div>
       </div>
+      
+      {/* Book Now Button */}
+      <button
+        onClick={handleBookNow}
+        className="mt-4 w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 text-lg transition-colors"
+      >
+        BOOK NOW
+      </button>
     </div>
   );
 }

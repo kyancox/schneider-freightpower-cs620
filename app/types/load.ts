@@ -13,6 +13,7 @@ export interface Load {
     time: string;
     liveLoad?: boolean;
     emptyMiles: number;
+    address?: string;
   };
   delivery: {
     city: string;
@@ -21,6 +22,7 @@ export interface Load {
     time: string;
     instructions: string[];
     emptyMiles: number;
+    address?: string;
   };
   isReload?: boolean;
 }
