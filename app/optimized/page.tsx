@@ -1,23 +1,28 @@
 "use client"
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import OptimizedLoadCard from '../components/OptimizedLoadCard';
+import LoadDetailsModal from '../components/LoadDetailsModal';
 import BottomNav from '../components/search-results/BottomNav';
 import { mockLoads } from '../data/mockLoads';
 import { Load } from '../types/load';
 
 export default function Optimized() {
+  const router = useRouter();
   const [searchInput, setSearchInput] = useState('');
   const [aiLoads, setAiLoads] = useState<Load[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchedDestination, setSearchedDestination] = useState('');
+  const [selectedLoad, setSelectedLoad] = useState<Load | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Split loads into different sections
   const loadsNearYou = mockLoads.slice(2, 6); // Oakland, SF, Modesto, Fresno
   const californiaToTexas = mockLoads.filter(load => 
     load.pickup.state === 'CA' && load.delivery.state === 'TX'
-  );
+  ).slice(0, 4);
 
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
@@ -55,6 +60,22 @@ export default function Optimized() {
     if (e.key === 'Enter') {
       handleSearch();
     }
+  };
+
+  const handleLoadClick = (load: Load) => {
+    setSelectedLoad(load);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedLoad(null);
+  };
+
+  const handleBookLoad = (loadId: string) => {
+    // Navigate to the booking page
+    // alert('Load booked!')
+    window.location.href = `/book/${loadId}`;
   };
 
   return (
@@ -97,7 +118,11 @@ export default function Optimized() {
             <div className="overflow-x-auto scrollbar-hide">
               <div className="flex gap-3 px-4 pb-2">
                 {aiLoads.map((load) => (
-                  <OptimizedLoadCard key={load.id} load={load} />
+                  <OptimizedLoadCard 
+                    key={load.id} 
+                    load={load} 
+                    onClick={() => handleLoadClick(load)}
+                  />
                 ))}
               </div>
             </div>
@@ -110,7 +135,7 @@ export default function Optimized() {
             <div className="relative overflow-hidden w-full bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-3 mb-4">
               <div className="relative z-10">
                 <h2 className="text-2xl text-white font-bold mb-0 flex items-center">
-                  Generating loads
+                  Fetching loads
                   <span className="ml-1 animate-pulse inline-block" style={{ letterSpacing: "2px" }}>
                     ...
                   </span>
@@ -141,7 +166,10 @@ export default function Optimized() {
       <div className="mb-6">
         <div className="flex items-center justify-between px-4 mb-3">
           <h3 className="text-xl font-bold text-black">Loads near you</h3>
-          <button className="text-sm font-medium text-gray-600 bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+          <button 
+            onClick={() => router.push('/all-loads')}
+            className="text-sm font-medium text-gray-600 bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
+          >
             See all
           </button>
         </div>
@@ -150,7 +178,11 @@ export default function Optimized() {
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex gap-3 px-4 pb-2">
             {loadsNearYou.map((load) => (
-              <OptimizedLoadCard key={load.id} load={load} />
+              <OptimizedLoadCard 
+                key={load.id} 
+                load={load} 
+                onClick={() => handleLoadClick(load)}
+              />
             ))}
           </div>
         </div>
@@ -168,7 +200,10 @@ export default function Optimized() {
                   {californiaToTexas[0].pickup.city}, {californiaToTexas[0].pickup.state} to{' '}
                   {californiaToTexas[0].delivery.city}, {californiaToTexas[0].delivery.state}
                 </h3>
-                <button className="text-base font-medium text-gray-600 bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors">
+                <button 
+                  onClick={() => router.push('/all-loads')}
+                  className="text-base font-medium text-gray-600 bg-gray-100 px-4 py-2 rounded-full hover:bg-gray-200 transition-colors"
+                >
                   See all
                 </button>
             </div>
@@ -177,7 +212,11 @@ export default function Optimized() {
             <div className="overflow-x-auto scrollbar-hide">
                 <div className="flex gap-3 px-4 pb-2">
                 {californiaToTexas.map((load) => (
-                    <OptimizedLoadCard key={load.id} load={load} />
+                    <OptimizedLoadCard 
+                      key={load.id} 
+                      load={load} 
+                      onClick={() => handleLoadClick(load)}
+                    />
                 ))}
                 </div>
             </div>
@@ -198,6 +237,14 @@ export default function Optimized() {
 
       {/* Bottom Navigation */}
       <BottomNav />
+
+      {/* Load Details Modal */}
+      <LoadDetailsModal
+        load={selectedLoad}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onBook={handleBookLoad}
+      />
     </div>
   );
 }

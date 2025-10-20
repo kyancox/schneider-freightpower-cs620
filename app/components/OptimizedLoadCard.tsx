@@ -4,16 +4,20 @@ import { Heart, MapPin } from 'lucide-react';
 
 interface OptimizedLoadCardProps {
   load: Load;
+  onClick?: () => void;
 }
 
-export default function OptimizedLoadCard({ load }: OptimizedLoadCardProps) {
+export default function OptimizedLoadCard({ load, onClick }: OptimizedLoadCardProps) {
   // Format weight to display as "41.6k lbs"
   const formatWeight = (weight: number) => {
     return `${(weight / 1000).toFixed(1)}k lbs`;
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border-2 border-gray-500/25 p-4 min-w-[280px] flex-shrink-0">
+    <div 
+      className="bg-white rounded-xl shadow-sm border-2 border-gray-500/25 p-4 min-w-[280px] flex-shrink-0 cursor-pointer hover:shadow-md transition-shadow"
+      onClick={onClick}
+    >
       {/* Price and Heart */}
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -24,7 +28,10 @@ export default function OptimizedLoadCard({ load }: OptimizedLoadCardProps) {
             </span>
           </div>
         </div>
-        <button className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+        <button 
+          className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
           <Heart className="w-6 h-6 text-gray-400" />
         </button>
       </div>

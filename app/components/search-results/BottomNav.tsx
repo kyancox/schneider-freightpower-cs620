@@ -1,14 +1,29 @@
 'use client';
 
+import { useRouter, usePathname } from 'next/navigation';
 import { Home, Search, FileText, Settings, MoreHorizontal } from 'lucide-react';
 
 export default function BottomNav() {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Determine if we're in demo or optimized context
+  const isDemo = pathname.startsWith('/demo');
+  const isOptimized = pathname.startsWith('/optimized');
+  
+  // Determine base path
+  const basePath = isDemo ? '/demo' : isOptimized ? '/optimized' : '';
+  
+  // Determine which page is active
+  const isHomePage = pathname.includes('/home');
+  const isSearchPage = !isHomePage && (isDemo || isOptimized);
+
   const navItems = [
-    { icon: Home, label: 'Home', active: false },
-    { icon: Search, label: 'Search', active: true },
-    { icon: FileText, label: 'My Loads', active: false },
-    { icon: Settings, label: 'Manage', active: false },
-    { icon: MoreHorizontal, label: 'More', active: false },
+    { icon: Home, label: 'Home', path: `${basePath}/home`, active: isHomePage },
+    { icon: Search, label: 'Search', path: basePath, active: isSearchPage },
+    { icon: FileText, label: 'My Loads', path: null, active: false },
+    { icon: Settings, label: 'Manage', path: null, active: false },
+    { icon: MoreHorizontal, label: 'More', path: null, active: false },
   ];
 
   return (
@@ -19,7 +34,11 @@ export default function BottomNav() {
           return (
             <button
               key={item.label}
-              onClick={() => {}}
+              onClick={() => {
+                if (item.path) {
+                  router.push(item.path);
+                }
+              }}
               className="flex flex-col items-center justify-center flex-1 py-1 cursor-pointer hover:bg-gray-50 rounded transition-colors"
             >
               <Icon 
