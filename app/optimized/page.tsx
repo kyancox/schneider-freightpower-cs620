@@ -1,15 +1,61 @@
 "use client"
-import { Search } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Loader2 } from 'lucide-react';
 import OptimizedLoadCard from '../components/OptimizedLoadCard';
 import BottomNav from '../components/search-results/BottomNav';
 import { mockLoads } from '../data/mockLoads';
+import { Load } from '../types/load';
 
 export default function Optimized() {
+  const [searchInput, setSearchInput] = useState('');
+  const [aiLoads, setAiLoads] = useState<Load[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchedDestination, setSearchedDestination] = useState('');
+
   // Split loads into different sections
   const loadsNearYou = mockLoads.slice(2, 6); // Oakland, SF, Modesto, Fresno
   const californiaToTexas = mockLoads.filter(load => 
     load.pickup.state === 'CA' && load.delivery.state === 'TX'
   );
+
+  const handleSearch = async () => {
+    if (!searchInput.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+    setAiLoads([]); // Clear previous results
+    setSearchedDestination(searchInput.trim());
+
+    try {
+      const response = await fetch('/api/generate-loads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ destination: searchInput.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate loads');
+      }
+
+      setAiLoads(data.loads);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate loads');
+      console.error('Error generating loads:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -19,14 +65,68 @@ export default function Optimized() {
           <Search className="w-5 h-5 text-gray-400 mr-3" />
           <input
             type="text"
-            placeholder="Search for loads or lanes"
+            placeholder="Enter City, State (e.g. Chicago, IL)"
             className="flex-1 bg-transparent text-base outline-none text-gray-700 placeholder-gray-400"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
           />
+          {isLoading && <Loader2 className="w-5 h-5 text-orange-500 animate-spin ml-2" />}
         </div>
+        {error && (
+          <div className="mt-2 text-sm text-red-600 bg-red-50 px-3 py-2 rounded">
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Main Content - with bottom padding for nav */}
       <div className="">
+        {/* AI Generated Loads Section */}
+        {aiLoads.length > 0 && (
+          <div className="mb-6">
+            <div className="relative overflow-hidden w-full bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-3 mb-4">
+              <div className="relative z-10">
+                <h2 className="text-2xl text-white font-bold mb-0">Madison, WI to {searchedDestination}</h2>
+                {/* <p className="text-base text-white">AI-generated loads • {aiLoads.length} available</p> */}
+              </div>
+            </div>
+            
+            {/* Horizontal Scroll Container */}
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-3 px-4 pb-2">
+                {aiLoads.map((load) => (
+                  <OptimizedLoadCard key={load.id} load={load} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="mb-6">
+            <div className="relative overflow-hidden w-full bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-3 mb-4">
+              <div className="relative z-10">
+                <h2 className="text-2xl text-white font-bold mb-0 flex items-center">
+                  Generating loads
+                  <span className="ml-1 animate-pulse inline-block" style={{ letterSpacing: "2px" }}>
+                    ...
+                  </span>
+                </h2>
+                {/* <p className="text-base text-white">Please wait while AI creates your loads</p> */}
+              </div>
+            </div>
+            
+            <div className="flex gap-3 px-4 pb-2 overflow-x-hidden">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex-shrink-0 w-[280px] h-[200px] bg-gray-200 rounded-lg animate-pulse" />
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Loads for you Banner */}
         <div className="mb-4">
         <div className="relative overflow-hidden w-full bg-orange-300/90 px-4 py-2">
