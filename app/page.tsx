@@ -29,7 +29,7 @@ export default function Home() {
 
           {/* Optimized UI Entry Point */}
           <button
-            onClick={() => router.push('/optimized')}
+            onClick={() => router.push('/optimized/home')}
             className="w-full bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer text-left group"
             type="button"
           >

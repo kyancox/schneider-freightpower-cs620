@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, Loader2 } from 'lucide-react';
 import OptimizedLoadCard from '../components/OptimizedLoadCard';
@@ -7,9 +7,15 @@ import LoadDetailsModal from '../components/LoadDetailsModal';
 import BottomNav from '../components/search-results/BottomNav';
 import { mockLoads } from '../data/mockLoads';
 import { Load } from '../types/load';
+import { useNatNal } from '../context/NatNalContext';
 
 export default function Optimized() {
   const router = useRouter();
+  const { natNalData } = useNatNal();
+  
+  console.log('🔷 Search page component rendered');
+  console.log('🔷 NAT/NAL data from context:', natNalData);
+  
   const [searchInput, setSearchInput] = useState('');
   const [aiLoads, setAiLoads] = useState<Load[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +29,32 @@ export default function Optimized() {
   const californiaToTexas = mockLoads.filter(load => 
     load.pickup.state === 'CA' && load.delivery.state === 'TX'
   ).slice(0, 4);
+
+  // Filter loads based on NAT/NAL
+  const natNalLoads = useMemo(() => {
+    console.log('🔍 Filtering loads with NAT/NAL data:', natNalData);
+    
+    if (!natNalData) {
+      console.log('❌ No NAT/NAL data, returning empty array');
+      return [];
+    }
+    
+    const filtered = mockLoads.filter(load => {
+      // Match location: same city OR same state
+      const cityMatch = load.pickup.city.toLowerCase() === natNalData.city.toLowerCase();
+      const stateMatch = load.pickup.state === natNalData.state;
+      const locationMatch = (cityMatch && stateMatch) || stateMatch;
+      
+      console.log(`Load ${load.id}: ${load.pickup.city}, ${load.pickup.state} - Match: ${locationMatch}`);
+      
+      // For simplicity, just filter by location
+      // In a real app, you'd also compare dates
+      return locationMatch;
+    }).slice(0, 4); // Limit to 4 loads
+    
+    console.log('✅ Found', filtered.length, 'matching loads');
+    return filtered;
+  }, [natNalData]);
 
   const handleSearch = async () => {
     if (!searchInput.trim()) return;
@@ -148,6 +180,33 @@ export default function Optimized() {
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex-shrink-0 w-[280px] h-[200px] bg-gray-200 rounded-lg animate-pulse" />
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* NAT/NAL Based Loads Section */}
+        {natNalData && natNalLoads.length > 0 && (
+          <div className="mb-6">
+            <div className="relative overflow-hidden w-full bg-gradient-to-r from-purple-500 to-purple-400 px-4 py-3 mb-4">
+              <div className="relative z-10">
+                <h2 className="text-2xl text-white font-bold mb-0">Based on your NAT/NAL</h2>
+                <p className="text-base text-white">
+                  Available from {natNalData.city}, {natNalData.state} • {new Date(natNalData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
+              </div>
+            </div>
+            
+            {/* Horizontal Scroll Container */}
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-3 px-4 pb-2">
+                {natNalLoads.map((load) => (
+                  <OptimizedLoadCard 
+                    key={load.id} 
+                    load={load} 
+                    onClick={() => handleLoadClick(load)}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         )}
