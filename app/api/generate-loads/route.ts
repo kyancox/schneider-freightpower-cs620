@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-2
+
     // Parse the destination to extract city and state
     const destinationParts = destination.split(',').map((s: string) => s.trim());
     const destinationCity = destinationParts[0] || destination;
@@ -87,7 +87,7 @@ Important requirements:
     try {
       loads = JSON.parse(text);
     } catch (parseError) {
-      console.error('Failed to parse Gemini response:', text);
+      console.error('Failed to parse Gemini response:', parseError, text);
       return NextResponse.json(
         { error: 'Failed to parse AI response', details: text },
         { status: 500 }

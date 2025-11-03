@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Bell, Search } from 'lucide-react';
 import BottomNav from './search-results/BottomNav';
-import { useNatNal, NatNalData } from '../context/NatNalContext';
+import { useNatNal } from '../context/NatNalContext';
 
 // Mock news data
 const mockNews = [
