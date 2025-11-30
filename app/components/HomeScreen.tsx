@@ -1,10 +1,10 @@
 "use client"
-import { useState } from 'react';
-import { Bell, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bell, Search, Loader2, ExternalLink } from 'lucide-react';
 import BottomNav from './search-results/BottomNav';
 import { useNatNal } from '../context/NatNalContext';
 
-// Mock news data
+// Mock news data (Schneider News)
 const mockNews = [
   {
     id: '1',
@@ -43,11 +43,26 @@ const mockNews = [
   }
 ];
 
+interface NewsArticle {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  url?: string;
+  image?: string;
+  author?: string;
+}
+
 export default function HomeScreen() {
   const [activeTab, setActiveTab] = useState('News');
+  const [activeNewsTab, setActiveNewsTab] = useState<'Live News' | 'Schneider News'>('Live News');
   const [searchInput, setSearchInput] = useState('');
   const { natNalData, setNatNalData } = useNatNal();
   const [isEditing, setIsEditing] = useState(!natNalData);
+  const [liveNews, setLiveNews] = useState<NewsArticle[]>([]);
+  const [isLoadingNews, setIsLoadingNews] = useState(false);
+  const [newsError, setNewsError] = useState<string | null>(null);
   
   // Form state
   const [formDate, setFormDate] = useState('');
@@ -104,6 +119,32 @@ export default function HomeScreen() {
     setFormTime(timeString);
   };
 
+  // Fetch live news when the Live News tab is active
+  useEffect(() => {
+    if (activeTab === 'News' && activeNewsTab === 'Live News' && liveNews.length === 0 && !isLoadingNews) {
+      setIsLoadingNews(true);
+      setNewsError(null);
+      
+      fetch('/api/news')
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Failed to fetch news');
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setLiveNews(data.news || []);
+        })
+        .catch((err) => {
+          console.error('Error fetching live news:', err);
+          setNewsError('Failed to load live news. Please try again later.');
+        })
+        .finally(() => {
+          setIsLoadingNews(false);
+        });
+    }
+  }, [activeTab, activeNewsTab, liveNews.length, isLoadingNews]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -153,26 +194,103 @@ export default function HomeScreen() {
       {/* Content Area */}
       <div className="flex-1 bg-white pb-20">
         {activeTab === 'News' && (
-          <div className="px-4 py-4 space-y-4">
-            {mockNews.map((news) => (
-              <div
-                key={news.id}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <span className="text-xs font-semibold text-[#ff6b35] bg-orange-50 px-2 py-1 rounded">
-                    {news.category}
-                  </span>
-                  <span className="text-xs text-gray-500">{news.date}</span>
-                </div>
-                <h3 className="font-bold text-gray-900 text-lg mb-2">
-                  {news.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {news.description}
-                </p>
+          <div>
+            {/* News Sub-tabs */}
+            <div className="bg-white border-b flex">
+              {['Live News', 'Schneider News'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveNewsTab(tab as 'Live News' | 'Schneider News')}
+                  className={`flex-1 py-3 text-center font-medium transition-colors ${
+                    activeNewsTab === tab
+                      ? 'text-black border-b-2 border-[#ff6b35]'
+                      : 'text-gray-500'
+                  }`}
+                  type="button"
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Live News Content */}
+            {activeNewsTab === 'Live News' && (
+              <div className="px-4 py-4 space-y-4">
+                {isLoadingNews && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 text-[#ff6b35] animate-spin mr-2" />
+                    <span className="text-gray-600">Loading live news...</span>
+                  </div>
+                )}
+                
+                {newsError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">
+                    {newsError}
+                  </div>
+                )}
+
+                {!isLoadingNews && !newsError && liveNews.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No news available at this time.
+                  </div>
+                )}
+
+                {!isLoadingNews && !newsError && liveNews.map((news) => (
+                  <div
+                    key={news.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-xs font-semibold text-[#ff6b35] bg-orange-50 px-2 py-1 rounded">
+                        {news.category}
+                      </span>
+                      <span className="text-xs text-gray-500">{news.date}</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-lg mb-2">
+                      {news.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-3">
+                      {news.description}
+                    </p>
+                    {news.url && (
+                      <a
+                        href={news.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-[#ff6b35] hover:text-orange-600 font-medium"
+                      >
+                        Read more <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+
+            {/* Schneider News Content */}
+            {activeNewsTab === 'Schneider News' && (
+              <div className="px-4 py-4 space-y-4">
+                {mockNews.map((news) => (
+                  <div
+                    key={news.id}
+                    className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="text-xs font-semibold text-[#ff6b35] bg-orange-50 px-2 py-1 rounded">
+                        {news.category}
+                      </span>
+                      <span className="text-xs text-gray-500">{news.date}</span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-lg mb-2">
+                      {news.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {news.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
         
